@@ -1,0 +1,514 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="description"
+          content="Assistente virtual do Mercadinho da Vila. Consulte produtos, preços e estoque.">
+
+    <title>Mercadinho da Vila | Assistente Virtual</title>
+
+    <style>
+        /* ==========================================
+           CONFIGURAÇÕES GERAIS
+        ========================================== */
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f1f5f3;
+            color: #26352d;
+        }
+
+        button,
+        input {
+            font: inherit;
+        }
+
+        button:focus-visible,
+        input:focus-visible {
+            outline: 3px solid #76b995;
+            outline-offset: 2px;
+        }
+
+        /* ==========================================
+           ESTRUTURA PRINCIPAL
+        ========================================== */
+
+        .container {
+            max-width: 760px;
+            height: 92vh;
+            height: 92dvh;
+            min-height: 450px;
+            margin: 4vh auto;
+            margin: 4dvh auto;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 5px 25px #00000012;
+
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* ==========================================
+           CABEÇALHO DO CHATBOT
+        ========================================== */
+
+        header {
+            background: #176b45;
+            color: #ffffff;
+            padding: 22px;
+        }
+
+        header h1 {
+            margin: 0 0 6px;
+            font-size: 23px;
+        }
+
+        header p {
+            margin: 0;
+            font-size: 14px;
+            opacity: 0.95;
+        }
+
+        /* ==========================================
+           ÁREA DAS MENSAGENS
+        ========================================== */
+
+        #chat {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            padding: 22px;
+
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .mensagem {
+            padding: 13px 16px;
+            border-radius: 14px;
+            max-width: 85%;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+        /* Mensagens enviadas pelo assistente. */
+        .bot {
+            background: #eef3ef;
+            align-self: flex-start;
+        }
+
+        /* Mensagens enviadas pelo cliente. */
+        .usuario {
+            background: #176b45;
+            color: #ffffff;
+            align-self: flex-end;
+        }
+
+        /* ==========================================
+           BOTÕES DE CONSULTA RÁPIDA
+        ========================================== */
+
+        .sugestoes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 10px 20px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .sugestoes button {
+            background: #ffffff;
+            color: #176b45;
+            border: 1px solid #a5c9b4;
+            border-radius: 20px;
+            padding: 9px 12px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background 0.2s;
+        }
+
+        .sugestoes button:hover:not(:disabled) {
+            background: #e7f3eb;
+        }
+
+        .sugestoes button:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        /* ==========================================
+           FORMULÁRIO DE ENVIO
+        ========================================== */
+
+        form {
+            display: flex;
+            gap: 10px;
+            padding: 18px;
+            border-top: 1px solid #eeeeee;
+        }
+
+        input {
+            flex: 1;
+            min-width: 0;
+            padding: 14px;
+            border: 1px solid #cccccc;
+            border-radius: 9px;
+            font-size: 15px;
+        }
+
+        form button {
+            background: #176b45;
+            color: #ffffff;
+            border: none;
+            border-radius: 9px;
+            padding: 0 22px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        form button:hover:not(:disabled) {
+            background: #125737;
+        }
+
+        form button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ==========================================
+           ADAPTAÇÃO PARA DISPOSITIVOS MÓVEIS
+        ========================================== */
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 0;
+                height: 100vh;
+                height: 100dvh;
+                min-height: 0;
+                border-radius: 0;
+            }
+
+            header {
+                padding: 18px;
+            }
+
+            header h1 {
+                font-size: 20px;
+            }
+
+            #chat {
+                padding: 15px;
+            }
+
+            .mensagem {
+                max-width: 92%;
+            }
+
+            .sugestoes {
+                padding: 10px;
+                gap: 6px;
+            }
+
+            .sugestoes button {
+                padding: 8px 10px;
+                font-size: 12px;
+            }
+
+            form {
+                padding: 12px;
+            }
+
+            form button {
+                padding: 0 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ==========================================
+         ESTRUTURA PRINCIPAL DO CHATBOT
+    ========================================== -->
+
+    <main class="container">
+
+        <!-- Identificação do mercadinho. -->
+        <header>
+            <h1>Mercadinho da Vila</h1>
+            <p>
+                Olá! Sou seu assistente virtual.
+                Como posso ajudar?
+            </p>
+        </header>
+
+        <!-- Área onde as mensagens são apresentadas. -->
+        <section id="chat"
+                 aria-label="Conversa com o assistente"
+                 aria-live="polite"
+                 aria-relevant="additions text">
+
+            <div class="mensagem bot">
+Olá! Seja bem-vindo ao Mercadinho da Vila!
+Posso ajudar com produtos, preços, estoque e informações da loja.
+            </div>
+
+        </section>
+
+        <!-- Botões para facilitar as consultas do cliente. -->
+        <nav class="sugestoes" aria-label="Consultas rápidas">
+
+            <button type="button"
+                    data-pergunta="Quais produtos estão disponíveis?">
+                Ver produtos
+            </button>
+
+            <button type="button"
+                    data-pergunta="Quais frutas vocês têm disponíveis?">
+                Frutas
+            </button>
+
+            <button type="button"
+                    data-pergunta="Quais verduras vocês têm disponíveis?">
+                Verduras
+            </button>
+
+            <button type="button"
+                    data-pergunta="Quais legumes vocês têm disponíveis?">
+                Legumes
+            </button>
+
+            <button type="button"
+                    data-pergunta="Mostre os produtos e seus preços.">
+                Consultar preços
+            </button>
+
+            <button type="button"
+                    data-pergunta="Quais produtos posso comprar e quais estão em falta?">
+                Conferir estoque
+            </button>
+
+            <button type="button"
+                    data-pergunta="Qual é o endereço e horário de funcionamento da loja?">
+                Informações da loja
+            </button>
+
+        </nav>
+
+        <!-- Formulário para enviar perguntas personalizadas. -->
+        <form id="formulario">
+
+            <input
+                id="pergunta"
+                type="text"
+                placeholder="Digite sua pergunta..."
+                aria-label="Digite sua mensagem"
+                maxlength="500"
+                autocomplete="off"
+                required
+            >
+
+            <button id="enviar" type="submit">
+                Enviar
+            </button>
+
+        </form>
+
+    </main>
+
+    <script>
+        /* ==========================================
+           ELEMENTOS DA INTERFACE
+        ========================================== */
+
+        const chat = document.getElementById("chat");
+        const formulario = document.getElementById("formulario");
+        const campo = document.getElementById("pergunta");
+        const botaoEnviar = document.getElementById("enviar");
+
+        const botoesSugestao = document.querySelectorAll(
+            ".sugestoes button"
+        );
+
+        // Indica se existe uma consulta em andamento.
+        let consultando = false;
+
+
+        /* ==========================================
+           CONTROLE DA INTERFACE
+        ========================================== */
+
+        function definirCarregamento(ativo) {
+            /*
+             * Impede o envio de consultas simultâneas
+             * enquanto aguardamos a resposta da API.
+             */
+
+            consultando = ativo;
+            botaoEnviar.disabled = ativo;
+
+            botoesSugestao.forEach(function(botao) {
+                botao.disabled = ativo;
+            });
+        }
+
+
+        /* ==========================================
+           FORMATAÇÃO DAS RESPOSTAS
+        ========================================== */
+
+        function formatarResposta(texto) {
+            /*
+             * Remove a formatação Markdown simples
+             * que pode aparecer nas respostas do Gemini.
+             */
+
+            return texto
+                .replace(/\*\*/g, "")
+                .replace(/^\s*\*\s+/gm, "• ")
+                .trim();
+        }
+
+
+        /* ==========================================
+           EXIBIÇÃO DAS MENSAGENS
+        ========================================== */
+
+        function adicionarMensagem(texto, tipo) {
+            /*
+             * Cria uma mensagem e adiciona ao chat.
+             * textContent evita interpretar HTML
+             * recebido nas respostas da inteligência artificial.
+             */
+
+            const elemento = document.createElement("div");
+
+            elemento.className = "mensagem " + tipo;
+            elemento.textContent = texto;
+
+            chat.appendChild(elemento);
+            chat.scrollTop = chat.scrollHeight;
+
+            return elemento;
+        }
+
+
+        /* ==========================================
+           COMUNICAÇÃO COM A API FASTAPI
+        ========================================== */
+
+        async function perguntar(texto) {
+            /*
+             * Envia a pergunta ao backend e apresenta
+             * a resposta produzida pelo Gemini.
+             */
+
+            if (consultando) {
+                return;
+            }
+
+            const mensagem = texto.trim();
+
+            if (!mensagem) {
+                return;
+            }
+
+            // Mostra a pergunta enviada pelo cliente.
+            adicionarMensagem(mensagem, "usuario");
+
+            campo.value = "";
+            definirCarregamento(true);
+
+            // Mensagem temporária durante a consulta.
+            const carregando = adicionarMensagem(
+                "Consultando o mercadinho...",
+                "bot"
+            );
+
+            try {
+                // Envia os dados para a rota /chat.
+                const resposta = await fetch("/chat", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        mensagem: mensagem
+                    })
+                });
+
+                // Verifica se o servidor respondeu corretamente.
+                if (!resposta.ok) {
+                    throw new Error(
+                        "Erro HTTP: " + resposta.status
+                    );
+                }
+
+                const dados = await resposta.json();
+
+                // Confirma se a resposta possui conteúdo válido.
+                if (typeof dados.resposta !== "string" ||
+                    !dados.resposta.trim()) {
+
+                    throw new Error("Resposta inválida da API.");
+                }
+
+                // Apresenta a resposta formatada.
+                carregando.textContent = formatarResposta(
+                    dados.resposta
+                );
+
+            } catch (erro) {
+                // Registra o erro no console para diagnóstico.
+                console.error("Falha na consulta:", erro);
+
+                // Apresenta uma mensagem amigável ao cliente.
+                carregando.textContent =
+                    "Desculpe! Não consegui responder agora. " +
+                    "Tente novamente em alguns instantes.";
+
+            } finally {
+                // Libera a interface após a consulta.
+                definirCarregamento(false);
+                campo.focus();
+                chat.scrollTop = chat.scrollHeight;
+            }
+        }
+
+
+        /* ==========================================
+           EVENTOS DO FORMULÁRIO
+        ========================================== */
+
+        formulario.addEventListener("submit", function(evento) {
+            evento.preventDefault();
+            perguntar(campo.value);
+        });
+
+
+        /* ==========================================
+           EVENTOS DOS BOTÕES DE CONSULTA RÁPIDA
+        ========================================== */
+
+        botoesSugestao.forEach(function(botao) {
+            botao.addEventListener("click", function() {
+                perguntar(botao.dataset.pergunta);
+            });
+        });
+
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,24 @@
+
+
+# Variáveis de ambiente e chaves privadas
+.env
+.env.*
+
+!.env.example
+
+# Ambiente virtual
+.venv/
+venv/
+
+# Arquivos temporários do Python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Banco de dados local
+*.db
+
+# Configurações locais do editor
+.vscode/
+
+
